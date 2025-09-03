@@ -1,0 +1,35 @@
+import streamlit as st
+import pandas as pd
+import random
+
+st.set_page_config(page_title="엑셀 당첨자 추첨기", layout="centered")
+
+st.title("🎉 엑셀 당첨자 추첨기")
+
+# 엑셀 파일 업로드
+uploaded_file = st.file_uploader("엑셀 파일을 업로드하세요", type=["xlsx", "xls"])
+
+if uploaded_file is not None:
+    # 데이터 읽기
+    df = pd.read_excel(uploaded_file)
+
+    st.subheader("📄 업로드된 데이터 미리보기")
+    st.dataframe(df.head())
+
+    # 추첨 인원 입력
+    num_winners = st.number_input("당첨자 수를 입력하세요", min_value=1, max_value=len(df), value=1, step=1)
+
+    if st.button("추첨하기"):
+        winners = df.sample(n=num_winners, random_state=random.randint(0, 10000))
+
+        st.subheader("🏆 당첨자 명단")
+        st.dataframe(winners)
+
+        # CSV 다운로드 버튼
+        csv = winners.to_csv(index=False).encode("utf-8-sig")
+        st.download_button(
+            label="📥 당첨자 명단 다운로드 (CSV)",
+            data=csv,
+            file_name="winners.csv",
+            mime="text/csv",
+        )
